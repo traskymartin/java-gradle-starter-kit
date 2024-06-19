@@ -1,0 +1,63 @@
+plugins {
+    id 'java'
+    id 'jacoco'
+}
+
+group = 'com.example'
+version = '1.0'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+jacoco {
+    toolVersion = "0.8.4"
+}
+
+jacocoTestReport {
+    reports {
+        xml.required.set(true)
+        csv.required.set(false)
+        html.required.set(false)
+        xml.outputLocation.set(file("${buildDir}/reports/jacoco/jacoco.xml"))
+    }
+}
+
+jar {
+    archiveBaseName = 'geektrust'
+    version =  null
+    manifest {
+        attributes 'Main-Class': 'com.example.geektrust.Main' // Change this to the main class of your program
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "PASSED", "SKIPPED", "FAILED", "STANDARD_ERROR"
+    }
+    finalizedBy jacocoTestReport
+    afterSuite { desc, result ->
+        if (!desc.parent)
+            println("${result.resultType} " +
+                    "(${result.testCount} tests, " +
+                    "${result.successfulTestCount} successes, " +
+                    "${result.failedTestCount} failures, " +
+                    "${result.skippedTestCount} skipped)")
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+//    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.2.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:3.11.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
+}
